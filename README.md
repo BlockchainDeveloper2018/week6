@@ -1,9 +1,9 @@
-#Heroku app
+# Heroku app
 https://ticketplatform.herokuapp.com/
 Contract 0x097682dDe6a84acEa746CddE2e08a78D9A591c5a
 
 
-#BTC first part
+# BTC first part
 Проверить баланс текущего аккаунта:
 ```
 D:\Projects\BlockchainDeveloper\week6\btc>btcclient.bat getbalance
@@ -484,7 +484,7 @@ D:\Projects\BlockchainDeveloper\week6\btc>btcclient.bat listaccounts
 }
 ```
 
-#BTC second part
+# BTC second part
 Попробуем подключиться к демону и запросить статус блокчейна:
 ```
 $ ./btctestnet.bat getblockchaininfo
