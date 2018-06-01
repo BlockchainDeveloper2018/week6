@@ -3,7 +3,7 @@ https://ticketplatform.herokuapp.com/
 Contract 0x097682dDe6a84acEa746CddE2e08a78D9A591c5a
 
 
-#BTC part
+#BTC first part
 Проверить баланс текущего аккаунта:
 ```
 D:\Projects\BlockchainDeveloper\week6\btc>btcclient.bat getbalance
@@ -483,3 +483,140 @@ D:\Projects\BlockchainDeveloper\week6\btc>btcclient.bat listaccounts
   "account2": 10.00000000
 }
 ```
+
+#BTC second part
+Попробуем подключиться к демону и запросить статус блокчейна:
+```
+$ ./btctestnet.bat getblockchaininfo
+{
+  "chain": "test",
+  "blocks": 1320856,
+  "headers": 1320856,
+  "bestblockhash": "00000000000003c9894024faf0c2d1e50fed38b4a88ddf0cdd5faaab6b5d4b60",
+  "difficulty": 3310843.932078449,
+  "mediantime": 1527880159,
+  "verificationprogress": 0.9999996950720793,
+  "initialblockdownload": false,
+  "chainwork": "0000000000000000000000000000000000000000000000419acebb399eb82498",
+  "size_on_disk": 13289039257,
+  "pruned": false,
+  "softforks": [
+    {
+      "id": "bip34",
+      "version": 2,
+      "reject": {
+        "status": true
+      }
+    },
+    {
+      "id": "bip66",
+      "version": 3,
+      "reject": {
+        "status": true
+      }
+    },
+    {
+      "id": "bip65",
+      "version": 4,
+      "reject": {
+        "status": true
+      }
+    }
+  ],
+  "bip9_softforks": {
+    "csv": {
+      "status": "active",
+      "startTime": 1456790400,
+      "timeout": 1493596800,
+      "since": 770112
+    },
+    "segwit": {
+      "status": "active",
+      "startTime": 1462060800,
+      "timeout": 1493596800,
+      "since": 834624
+    }
+  },
+  "warnings": "Warning: unknown new rules activated (versionbit 28)"
+}
+```
+
+Количество blocks должно быть равно максимальному номеру блока тут https://live.blockcypher.com/btc-testnet/
+Если она меньше, то нужно дождаться завершения синхронизации.
+
+### Запрашиваем тестовый BTC через faucet
+
+Создаем адрес для получения BTC:
+$ ./btctestnet.bat getnewaddress ""
+2NCKJYpnwQjzK1hYMF8Kddmgq5wEBU3wDWL
+
+Получаем адрес **&lt;testnet_address1&gt;**.
+testnet_address1 = 2NCKJYpnwQjzK1hYMF8Kddmgq5wEBU3wDWL
+
+Далее идем сюда https://testnet.manu.backend.hamburg/faucet и запрашиваем получение BTC в тестнете на этот адрес **&lt;testnet_address1&gt;**.
+
+
+В случае успеха сревис выводит хеш транзакции.
+f91fc0ca60e7f744c2febc28f26a2ca648e48b42142415cd97cc3233a01b09e3
+
+
+Проверяем, что имеем входящую транзакцию:
+```
+$ ./btctestnet.bat listtransactions
+[
+  {
+    "account": "",
+    "address": "2NCKJYpnwQjzK1hYMF8Kddmgq5wEBU3wDWL",
+    "category": "receive",
+    "amount": 0.27500000,
+    "label": "",
+    "vout": 0,
+    "confirmations": 0,
+    "trusted": false,
+    "txid": "f91fc0ca60e7f744c2febc28f26a2ca648e48b42142415cd97cc3233a01b09e3",
+    "walletconflicts": [
+    ],
+    "time": 1527881254,
+    "timereceived": 1527881254,
+    "bip125-replaceable": "no"
+  }
+]
+```
+txid = f91fc0ca60e7f744c2febc28f26a2ca648e48b42142415cd97cc3233a01b09e3
+
+
+Копируем **&lt;txid&gt;** из входящей транзакции для создания новой.
+
+
+Создаем транзакцию перевода средств со своего адреса на другой свой с одновременным указанием произвольных данных в транзакции:
+```
+$ ./btctestnet.bat  createrawtransaction "[{\"txid\": \"f91fc0ca60e7f744c2febc28f26a2ca648e48b42142415cd97cc3233a01b09e3\",\"vout\":0}]" "{\"2NCKJYpnwQjzK1hYMF8Kddmgq5wEBU3wDWL\": 0.2735, \"data\":\"4a756c696127732074657374\"}"
+0200000001e3091ba03332cc97cd152414428be448a62c6af228bcfec244f7e760cac01ff90000000000ffffffff02f053a1010000000017a914d12fdc71c91a7e27ddd3f34ff6849cc7bf5b9dfb8700000000000000000e6a0c4a756c69612773207465737400000000
+```
+
+Вместо deadbeef можно указать произвольные данные в hex-формате (до 80 байт, то есть до 140 символов в формате hex). Преобразовать текстовую строку в hex можно тут http://www.swingnote.com/tools/texttohex.php.
+
+После создания транзакции подписываем ее `signrawtransaction` и отправляем через `sendrawtransaction`.
+```
+$ ./btctestnet.bat signrawtransaction 0200000001e3091ba03332cc97cd152414428be448a62c6af228bcfec244f7e760cac01ff90000000000ffffffff02f053a1010000000017a914d12fdc71c91a7e27ddd3f34ff6849cc7bf5b9dfb8700000000000000000e6a0c4a756c69612773207465737400000000
+{
+  "hex": "02000000000101e3091ba03332cc97cd152414428be448a62c6af228bcfec244f7e760cac01ff90000000017160014cd60fa9d2cc1e1b0f383ce4e426c96f61d3c00a1ffffffff02f053a1010000000017a914d12fdc71c91a7e27ddd3f34ff6849cc7bf5b9dfb8700000000000000000e6a0c4a756c6961277320746573740247304402205015ea716566bd2cc41dea612a72e08f90662db51f5b86498c371b3eebf98c3402206280fef4bc81ef4a443a7953e75e1b940086351aaca1c8becfa2470ffd581d980121020b18e40f7bf4f887369de98fd1108335aba0cd52c19d09f074262e8ef2743dce00000000",
+  "complete": true
+}
+```
+
+```
+$ ./btctestnet.bat sendrawtransaction 02000000000101e3091ba03332cc97cd152414428be448a62c6af228bcfec244f7e760cac01ff90000000017160014cd60fa9d2cc1e1b0f383ce4e426c96f61d3c00a1ffffffff02f053a1010000000017a914d12fdc71c91a7e27ddd3f34ff6849cc7bf5b9dfb8700000000000000000e6a0c4a756c6961277320746573740247304402205015ea716566bd2cc41dea612a72e08f90662db51f5b86498c371b3eebf98c3402206280fef4bc81ef4a443a7953e75e1b940086351aaca1c8becfa2470ffd581d980121020b18e40f7bf4f887369de98fd1108335aba0cd52c19d09f074262e8ef2743dce00000000
+6a30b475c242476e89730584db8efde0f8f870edd7ecc5fc983288da4d037fa9
+```
+
+В реультате отправки получаем хеш (txid) новой транзакции и идем смотреть ее в блокчейн-эксплорере тестнета биткойна https://www.blocktrail.com/tBTC
+txid = 6a30b475c242476e89730584db8efde0f8f870edd7ecc5fc983288da4d037fa9
+
+https://www.blocktrail.com/tBTC/tx/6a30b475c242476e89730584db8efde0f8f870edd7ecc5fc983288da4d037fa9#tx_messages
+
+### Задание 2
+2.1. Easy. Запишите свой текст в тестовый блокчейн биткойна с использованием техники, описанной выше.
+6a0c4a756c696127732074657374
+Julia's test
+
