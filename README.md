@@ -620,3 +620,6 @@ https://www.blocktrail.com/tBTC/tx/6a30b475c242476e89730584db8efde0f8f870edd7ecc
 6a0c4a756c696127732074657374
 Julia's test
 
+
+# lightning application 
+Идея - чатбот. Например, который за небольшую плату, поможет найти подходящие рецепты из тех продуктов,что у тебя есть
